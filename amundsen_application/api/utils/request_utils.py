@@ -40,6 +40,7 @@ def request_metadata(*,     # type: ignore
                            client=app.config['METADATASERVICE_REQUEST_CLIENT'],
                            headers=headers,
                            timeout_sec=timeout_sec,
+                           session=app.config['METADATASERVICE_REQUESTS_SESSION'],
                            data=data)
 
 
@@ -72,11 +73,12 @@ def request_search(*,     # type: ignore
                            client=app.config['SEARCHSERVICE_REQUEST_CLIENT'],
                            headers=headers,
                            timeout_sec=timeout_sec,
+                           session=app.config['SEARCHSERVICE_REQUESTS_SESSION'],
                            data=data)
 
 
 # TODO: Define an interface for envoy_client
-def request_wrapper(method: str, url: str, client, headers, timeout_sec: int, data=None):  # type: ignore
+def request_wrapper(method: str, url: str, client, headers, timeout_sec: int, session: requests.Session, data=None):  # type: ignore
     """
     Wraps a request to use Envoy client and headers, if available
     :param method: DELETE | GET | POST | PUT
@@ -84,6 +86,7 @@ def request_wrapper(method: str, url: str, client, headers, timeout_sec: int, da
     :param client: Optional Envoy client
     :param headers: Optional Envoy request headers
     :param timeout_sec: Number of seconds before timeout is triggered. Not used with Envoy
+    :param session: A requests.Session to use to make the http call. Not needed if an Envoy client is passed.
     :param data: Optional request payload
     :return:
     """
@@ -102,14 +105,13 @@ def request_wrapper(method: str, url: str, client, headers, timeout_sec: int, da
         else:
             raise Exception('Method not allowed: {}'.format(method))
     else:
-        with requests.Session() as s:
-            if method == 'DELETE':
-                return s.delete(url, headers=headers, timeout=timeout_sec)
-            elif method == 'GET':
-                return s.get(url, headers=headers, timeout=timeout_sec)
-            elif method == 'POST':
-                return s.post(url, headers=headers, timeout=timeout_sec, data=data)
-            elif method == 'PUT':
-                return s.put(url, headers=headers, timeout=timeout_sec, data=data)
-            else:
-                raise Exception('Method not allowed: {}'.format(method))
+        if method == 'DELETE':
+            return session.delete(url, headers=headers, timeout=timeout_sec)
+        elif method == 'GET':
+            return session.get(url, headers=headers, timeout=timeout_sec)
+        elif method == 'POST':
+            return session.post(url, headers=headers, timeout=timeout_sec, data=data)
+        elif method == 'PUT':
+            return session.put(url, headers=headers, timeout=timeout_sec, data=data)
+        else:
+            raise Exception('Method not allowed: {}'.format(method))

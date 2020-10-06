@@ -1,4 +1,5 @@
 import os
+import requests
 from typing import Callable, Dict, List, Optional, Set  # noqa: F401
 from amundsen_application.models.user import User
 
@@ -35,11 +36,15 @@ class Config:
     SEARCHSERVICE_REQUEST_CLIENT = None
     SEARCHSERVICE_REQUEST_HEADERS = None
     SEARCHSERVICE_BASE = ''
+    SEARCHSERVICE_REQUESTS_SESSION = requests.Session()
+    """A requests.Session object to use for all requests to Amundsen's Search service."""
 
     # Metadata Service
     METADATASERVICE_REQUEST_CLIENT = None
     METADATASERVICE_REQUEST_HEADERS = None
     METADATASERVICE_BASE = ''
+    METADATASERVICE_REQUESTS_SESSION = requests.Session()
+    """A requests.Session object to use for all requests to Amundsen's Metadata service."""
 
     # Mail Client Features
     MAIL_CLIENT = None
